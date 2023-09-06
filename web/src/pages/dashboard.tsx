@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import confetti from 'canvas-confetti';
 
+const sleep = (ms:number)=> new Promise(res=>{setTimeout(res,ms);});
+
 const Dashboard = () => {
     const symbols = ['🍎', '🍊', '🍇'];
     const [slots, setSlots] = useState(['', '', '']);
     const [result, setResult] = useState<string>();
     const [showSadEmoji, setShowSadEmoji] = useState(false);
+    const [isLoading , setIsLoading] = useState(false);
 
     const fireConfetti = () => {
         // Fire from the center
@@ -16,7 +19,10 @@ const Dashboard = () => {
         });
     };
 
-    const handleLottery = () => {
+    const handleLottery = async () => {
+        setIsLoading(true);
+        await sleep (500);
+        setIsLoading(false);
         const newSlots = [
             symbols[Math.floor(Math.random() * symbols.length)],
             symbols[Math.floor(Math.random() * symbols.length)],
@@ -54,12 +60,12 @@ const Dashboard = () => {
                 <>
                 <h2>{result}</h2>
                 {showSadEmoji && <div style={{ fontSize: '50px' }}>😢</div>}
-                <button onClick={resetGame}>Try Again</button>
+                <button disabled={isLoading} onClick={resetGame}>Try Again</button>
                 </>
             ) : (
                 <>
                 <p>Click the button below to see if you win!</p>
-                <button onClick={handleLottery}>Try your luck</button>
+                <button disabled={isLoading} onClick={handleLottery}>Try your luck</button>
                 </>
             )}
         </div>

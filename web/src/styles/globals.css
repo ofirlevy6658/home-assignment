@@ -106,6 +106,10 @@ button:hover {
   transform: scale(1.05);
 }
 
+button:disabled {
+  background-color: #605e5d;
+}
+
 h2 {
   font-size: 2rem;
   margin-top: 20px;
