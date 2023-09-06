@@ -6,12 +6,6 @@ body {
   color: white;
 }
 
-.container {
-  display: flex;
-  height: 100vh;
-  justify-content: center;
-  align-items: center;
-}
 
 form-wrapper {
   background-color: #ffffff;
@@ -41,33 +35,6 @@ input[type="password"] {
   transition: border-color 0.3s ease;
 }
 
-input[type="email"]:focus,
-input[type="password"]:focus {
-  border-color: #7aabdf;
-}
-
-.error-message {
-  color: #ff0000;
-  margin-top: 10px;
-}
-
-button {
-  display: inline-block;
-  padding: 10px 20px;
-  background-color: #007bff;
-  border: none;
-  border-radius: 4px;
-  color: #ffffff;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-top: 20px;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-
-
 /* lotteryStyles.css */
 
 
@@ -77,6 +44,7 @@ button:hover {
   height: 100vh;
   justify-content: center;
   align-items: center;
+
 }
 
 h1 {
@@ -90,7 +58,7 @@ p {
   margin-bottom: 20px;
 }
 
-button {
+.ButtonLogin {
   background-color: #ff4500;
   color: white;
   padding: 10px 20px;
@@ -152,7 +120,6 @@ h2 {
   background-color: blue;
 }
 
-
 @keyframes spin {
   from {
       transform: rotate(0deg);
@@ -165,8 +132,6 @@ h2 {
 .spinning {
   animation: spin 5s linear infinite;
 }
-
-
 
 .slots {
   display: flex;
@@ -189,7 +154,24 @@ h2 {
   justify-content: center; 
 }
 
+.Button {
+  background-color: #ff4500;
+}
 
+.logo {
+  width: 100px;
+  height: 100px;
+  overflow: auto;
+  position: absolute;  
+  top: 10px;
+  right: 10px;
+}
+
+.logo img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
 
 
 

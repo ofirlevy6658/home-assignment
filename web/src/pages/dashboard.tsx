@@ -1,17 +1,20 @@
 import { useState } from 'react';
 import confetti from 'canvas-confetti';
+import { Button } from '@mantine/core';
+import { useRouter } from 'next/router';
+import { Loader2 } from "lucide-react";
 
-const sleep = (ms:number)=> new Promise(res=>{setTimeout(res,ms);});
+const sleep = (ms:number) => new Promise(res => {setTimeout(res, ms);});
 
 const Dashboard = () => {
-    const symbols = ['🍎', '🍊', '🍇'];
+    const router = useRouter();
+    const symbols = ['🍎', '🍊', '🍇', '💰'];  
     const [slots, setSlots] = useState(['', '', '']);
-    const [result, setResult] = useState<string>();
+    const [result, setResult] = useState<string | undefined>();
     const [showSadEmoji, setShowSadEmoji] = useState(false);
     const [isLoading , setIsLoading] = useState(false);
 
     const fireConfetti = () => {
-        // Fire from the center
         confetti({
             particleCount: 300,
             spread: 200,
@@ -21,23 +24,27 @@ const Dashboard = () => {
 
     const handleLottery = async () => {
         setIsLoading(true);
-        await sleep (500);
+        await sleep(2000);
         setIsLoading(false);
-        const newSlots = [
-            symbols[Math.floor(Math.random() * symbols.length)],
-            symbols[Math.floor(Math.random() * symbols.length)],
-            symbols[Math.floor(Math.random() * symbols.length)],
-        ];
-        setSlots(newSlots);
+        
+        let newSlots;
 
-        if (newSlots[0] === newSlots[1] && newSlots[1] === newSlots[2]) {
+        if (Math.random() > 0.5) {
+            newSlots = ['💰', '💰', '💰'];
             fireConfetti();
             setResult('You win!');
             setShowSadEmoji(false);
         } else {
+            newSlots = [
+                symbols[Math.floor(Math.random() * symbols.length)],
+                symbols[Math.floor(Math.random() * symbols.length)],
+                symbols[Math.floor(Math.random() * symbols.length)]
+            ];
             setResult('You lose!');
             setShowSadEmoji(true);
         }
+
+        setSlots(newSlots);
     };
 
     const resetGame = () => {
@@ -46,8 +53,19 @@ const Dashboard = () => {
         setSlots(['', '', '']);
     };
 
+    const handleLogout = () => {
+        router.push('/');
+    };
+
     return (
         <div className="container">
+            <Button 
+                className="Button"
+                style={{ position: 'absolute', top: '10px', left: '10px' }} 
+                onClick={handleLogout}
+            >
+                Logout
+            </Button>
             <h1>Welcome to the Lottery Page!</h1>
             
             <div className="slots">
@@ -60,12 +78,19 @@ const Dashboard = () => {
                 <>
                 <h2>{result}</h2>
                 {showSadEmoji && <div style={{ fontSize: '50px' }}>😢</div>}
-                <button disabled={isLoading} onClick={resetGame}>Try Again</button>
+                <Button className="Button" disabled={isLoading} onClick={resetGame}>Try Again</Button>
                 </>
             ) : (
                 <>
                 <p>Click the button below to see if you win!</p>
-                <button disabled={isLoading} onClick={handleLottery}>Try your luck</button>
+                {isLoading ? (
+                    <Button disabled>
+                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                       Please wait
+                    </Button>
+                ) : (
+                    <Button className="Button" onClick={handleLottery}>Try your luck</Button>
+                )}
                 </>
             )}
         </div>
