@@ -1,0 +1,18 @@
+# Source: r2-ue-compose/templates/compose.yaml
+
+services:
+  gateway:
+    depends_on:
+      - web
+      - be
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 8080:8080
+  web:
+    build: ./web
+    image: r2-web
+  be:
+    build: ./be-demo
+    image: r2-be-demo
