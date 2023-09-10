@@ -24,12 +24,20 @@ const Dashboard = () => {
 
     const handleLottery = async () => {
         setIsLoading(true);
-        await sleep(2000);
-        setIsLoading(false);
         
+        const t = localStorage.getItem("token");
+        const response = await fetch("/api/try_luck", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${t}`
+            }
+        });
+    
+        const data = await response.json();
+    
         let newSlots;
-
-        if (Math.random() > 0.5) {
+    
+        if (data.win) {
             newSlots = ['💰', '💰', '💰'];
             fireConfetti();
             setResult('You win!');
@@ -43,9 +51,12 @@ const Dashboard = () => {
             setResult('You lose!');
             setShowSadEmoji(true);
         }
-
+    
         setSlots(newSlots);
+        setIsLoading(false);
     };
+    
+    
 
     const resetGame = () => {
         setResult(undefined);
@@ -53,10 +64,24 @@ const Dashboard = () => {
         setSlots(['', '', '']);
     };
 
-    const handleLogout = () => {
-        router.push('/');
-    };
 
+    const handleLogout = async () => {
+        const t = localStorage.getItem("token");
+        
+        const response = await fetch("/api/logout", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${t}`
+            }
+        });
+    
+        if (response.ok) {
+            localStorage.removeItem("token");
+            router.push('/');
+        }
+    };
+    
+    
     return (
         <div className="container">
             <Button 

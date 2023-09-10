@@ -8,7 +8,7 @@ class MyDocument extends Document {
         <Head>
           <link rel="icon" href="/R2_logo01-1.png" />
           <div className="logo">
-            <Image src="/R2.png" alt="R2 Logo" width={90} height={90} />
+            <Image src="/r2_svg.svg" alt="R2 Logo" width={90} height={90} />
           </div>
         </Head>
         <body>

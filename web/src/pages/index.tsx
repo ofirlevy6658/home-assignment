@@ -7,14 +7,31 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string>();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = () => {
-    if (password !== '1234') {
-      setError('The code is incorrect.');
+  const handleLogin = async () => {
+    // const t = localStorage.getItem("token");
+    setIsLoading(true);
+    const res = await fetch(
+      "/api/login",
+      {
+        method:"POST",
+        headers: {
+          "Content-Type": "application/json",
+          // "Authorization": `Bearer ${t}`
+        },
+        body: JSON.stringify({email,password})
+      }
+    );
+    const { token, error: resError } = await res.json();
+    if (resError !== undefined) {
+      setError(resError);
     } else {
       setError(undefined);
+      localStorage.setItem("token", token);
       router.push('/dashboard');
     }
+    setIsLoading(false);
   };
 
   return (
@@ -51,6 +68,7 @@ const Login = () => {
         <Button 
                 className="ButtonLogin"
                 onClick={handleLogin}
+                disabled={isLoading}
             >
                 Login
             </Button>
