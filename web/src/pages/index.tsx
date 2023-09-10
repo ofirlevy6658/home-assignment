@@ -1,80 +1,133 @@
-import { useState } from 'react';
-import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import confetti from 'canvas-confetti';
 import { Button } from '@mantine/core';
+import { useRouter } from 'next/router';
+import { Loader2 } from "lucide-react";
 
-const Login = () => {
-  const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState(false);
+const sleep = (ms:number) => new Promise(res => {setTimeout(res, ms);});
 
-  const handleLogin = async () => {
-    // const t = localStorage.getItem("token");
-    setIsLoading(true);
-    const res = await fetch(
-      "/api/login",
-      {
-        method:"POST",
-        headers: {
-          "Content-Type": "application/json",
-          // "Authorization": `Bearer ${t}`
-        },
-        body: JSON.stringify({email,password})
-      }
-    );
-    const { token, error: resError } = await res.json();
-    if (resError !== undefined) {
-      setError(resError);
-    } else {
-      setError(undefined);
-      localStorage.setItem("token", token);
-      router.push('/dashboard');
-    }
-    setIsLoading(false);
-  };
+const Dashboard = () => {
+    const router = useRouter();
 
-  return (
-    <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh' 
-    }}>
-      <div style={{ width: '300px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <div>
-          <label>
-            Email:
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={{ width: '100%', padding: '10px', boxSizing: 'border-box' }}
-            />
-          </label>
-        </div>
-        <div>
-          <label>
-            Password:
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={{ width: '100%', padding: '10px', boxSizing: 'border-box' }}
-            />
-          </label>
-        </div>
-        {error && <div style={{ color: 'red' }}>{error}</div>}
-        <Button 
-                className="ButtonLogin"
-                onClick={handleLogin}
-                disabled={isLoading}
+    useEffect(() => {
+        if (localStorage.getItem("token") === null) {
+            router.replace('/login');
+        }
+    }, [router]);
+
+    const symbols = ['🍎', '🍊', '🍇', '💰'];  
+    const [slots, setSlots] = useState(['', '', '']);
+    const [result, setResult] = useState<string | undefined>();
+    const [showSadEmoji, setShowSadEmoji] = useState(false);
+    const [isLoading , setIsLoading] = useState(false);
+
+    const fireConfetti = () => {
+        confetti({
+            particleCount: 300,
+            spread: 200,
+            origin: { x: 0.5, y: 0.5 }
+        });
+    };
+
+    const handleLottery = async () => {
+        setIsLoading(true);
+        
+        const t = localStorage.getItem("token");
+        const response = await fetch("/api/try_luck", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${t}`
+            }
+        });
+    
+        const data = await response.json();
+    
+        let newSlots;
+    
+        if (data.win) {
+            newSlots = ['💰', '💰', '💰'];
+            fireConfetti();
+            setResult('You win!');
+            setShowSadEmoji(false);
+        } else {
+            newSlots = [
+                symbols[Math.floor(Math.random() * symbols.length)],
+                symbols[Math.floor(Math.random() * symbols.length)],
+                symbols[Math.floor(Math.random() * symbols.length)]
+            ];
+            setResult('You lose!');
+            setShowSadEmoji(true);
+        }
+    
+        setSlots(newSlots);
+        setIsLoading(false);
+    };
+    
+    
+
+    const resetGame = () => {
+        setResult(undefined);
+        setShowSadEmoji(false);
+        setSlots(['', '', '']);
+    };
+
+
+    const handleLogout = async () => {
+        const t = localStorage.getItem("token");
+        
+        const response = await fetch("/api/logout", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${t}`
+            }
+        });
+        const jRes = await response.json();
+    
+        if (jRes === "OK") {
+            localStorage.removeItem("token");
+            router.push('/login');
+        }
+    };
+    
+    
+    return (
+        <div className="container">
+            <Button 
+                className="Button"
+                style={{ position: 'absolute', top: '10px', left: '10px' }} 
+                onClick={handleLogout}
             >
-                Login
+                Logout
             </Button>
-      </div>
-    </div>
-  );
+            <h1>Welcome to the Lottery Page!</h1>
+            
+            <div className="slots">
+                {slots.map((slot, index) => (
+                    <span key={index} className="slot-symbol">{slot}</span>
+                ))}
+            </div>
+
+            {result ? (
+                <>
+                <h2>{result}</h2>
+                {showSadEmoji && <div style={{ fontSize: '50px' }}>😢</div>}
+                <Button className="Button" disabled={isLoading} onClick={resetGame}>Try Again</Button>
+                </>
+            ) : (
+                <>
+                <p>Click the button below to see if you win!</p>
+                {isLoading ? (
+                    <Button disabled>
+                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                       Please wait
+                    </Button>
+                ) : (
+                    <Button className="Button" onClick={handleLottery}>Try your luck</Button>
+                )}
+                </>
+            )}
+        </div>
+    );
 };
 
-export default Login;
+export default Dashboard;
