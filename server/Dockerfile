@@ -10,6 +10,6 @@ COPY . .
 
 USER node
 
-CMD ["node", "index.js"]
+CMD ["node", "./src/index.js"]
 
 EXPOSE 4000
