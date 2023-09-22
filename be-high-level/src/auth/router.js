@@ -16,12 +16,12 @@ router.post("/login", (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(401).json({ message: "Email and password required" });
+      return res.status(401).json({ error: "Email and password required" });
     }
 
     const isValidEmail = EmailValidator.validate(email);
     if (!isValidEmail || password !== SECRET) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
     const token = generateRandomToken();
@@ -39,7 +39,7 @@ router.post("/logout", (req, res) => {
 
     if (tokenStorage.has(token)) {
       tokenStorage.delete(token);
-      return res.status(200).send("OK");
+      return res.status(200).send('"OK"');
     }
     res.status(401).json({ error: "Invalid token" });
   } catch (error) {
