@@ -51,7 +51,7 @@ Call it `be-high-level`.
 
 ### Phase 2
 * Make a branch called `low-level`, and make sure all changes from this phase are commited to that branch.
-* Repeat phase 1, but use whatever low-level programming language (manual memory management) as you'd like, such as `Rust`, `Zig`, `C`, `C++` and etc.  
+* Repeat phase 1, but use whatever low-level programming language (manual memory management) as you'd like, such as `C`, `C++`, `Rust`, `Zig` and etc.  
 Call it `be-low-level`.
 
 ### Phase 3
