@@ -2,15 +2,20 @@ import express from "express";
 import * as EmailValidator from "email-validator";
 import {
   generateRandomToken,
-  getWinChance,
+  getWinRate,
   simulateGamble,
   getTokenFromReq,
+  getCurrentDate,
   SECRET,
 } from "./utils.js";
 const router = express.Router();
 
 const tokenStorage = new Set();
-const usersScore = {};
+
+const dailyCounter = {
+  date: getCurrentDate(),
+  wins: 0,
+};
 
 router.post("/login", (req, res) => {
   try {
@@ -55,11 +60,18 @@ router.post("/try_luck", (req, res) => {
       return res.status(401).json({ error: "Invalid token" });
     }
 
-    const userCurrentScore = usersScore[token] ?? 0;
-    const winRate = getWinChance(userCurrentScore);
+    const currentDate = getCurrentDate();
+    if (currentDate !== dailyCounter.date) {
+      dailyCounter.date = currentDate;
+      dailyCounter.wins = 0;
+    }
 
+    const winRate = getWinRate(dailyCounter.wins);
     const isUserWin = simulateGamble(winRate);
-    usersScore[token] = isUserWin ? userCurrentScore + 1 : userCurrentScore;
+    if (isUserWin) {
+      dailyCounter.wins++;
+    }
+    console.log("win rate is ", winRate);
     return res.status(200).json({ win: isUserWin });
   } catch (error) {
     console.error("An error occurred:", error);
