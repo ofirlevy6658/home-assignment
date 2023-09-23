@@ -1,7 +1,11 @@
 import express from "express";
 import authRouter from "./auth/router.js";
 import swaggerUi from "swagger-ui-express";
-import swaggerDocument from "./swagger.json" assert { type: "json" };
+import { readFile } from "fs/promises";
+
+const swaggerDocument = JSON.parse(
+  await readFile(new URL("./swagger.json", import.meta.url))
+);
 
 const app = express();
 
