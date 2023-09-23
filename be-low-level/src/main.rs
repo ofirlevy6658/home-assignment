@@ -1,4 +1,6 @@
 use std::convert::Infallible;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use warp::{http::StatusCode, Filter, Rejection, Reply, reject::Reject};
 use serde::{Deserialize, Serialize};
 use validator::Validate;
@@ -39,6 +41,13 @@ struct WinResponse {
 
 #[tokio::main]
 async fn main() {
+    
+    let counter = Arc::new(AtomicUsize::new(0));
+    println!("{}",counter.load(Ordering::Relaxed));
+
+    let counter_filter = warp::any().map(move || counter.clone());
+
+
     let health_route = warp::path!("health").and_then(health_handler);
 
     let login_route = warp::path!("api" / "login")
@@ -50,8 +59,9 @@ async fn main() {
         .and(warp::post())
         .and_then(logout_handler);
 
-    let try_luck_route = warp::path!("api" / "try_luck")
+        let try_luck_route = warp::path!("api" / "try_luck")
         .and(warp::post())
+        .and(counter_filter.clone()) 
         .and_then(try_luck_handler);
 
     let routes = health_route
@@ -89,11 +99,16 @@ async fn logout_handler() -> Result<impl Reply> {
     Ok("\"OK\"")
 }
 
-async fn try_luck_handler() -> Result<impl Reply> {
+async fn try_luck_handler(counter: Arc<AtomicUsize>) -> Result<impl Reply> {
     let mut rng = rand::thread_rng();
+    let counter_value = counter.load(Ordering::Relaxed);
+    let win_rate = if counter_value >= 30 { 0.4 } else { 0.7 };
+    
     let random_number: f64 = rng.gen();
-
-    let win = if random_number < 0.7 {
+    
+    let win = if random_number < win_rate {
+        counter.fetch_add(1, Ordering::Relaxed);
+        println!("{}", counter.load(Ordering::Relaxed));
         true
     } else {
         false
