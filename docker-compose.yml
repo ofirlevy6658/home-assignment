@@ -14,5 +14,9 @@ services:
     build: ./web
     image: r2-web
   be:
+    depends_on:
+      - redis
     build: ./be-high-level
     image: be-high-level
+  redis:
+    image: "redis:alpine"

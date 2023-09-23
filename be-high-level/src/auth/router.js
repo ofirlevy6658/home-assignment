@@ -1,5 +1,6 @@
 import express from "express";
 import * as EmailValidator from "email-validator";
+import client from "../redisClient.js";
 import {
   generateRandomToken,
   getWinRate,
@@ -11,11 +12,6 @@ import {
 const router = express.Router();
 
 const tokenStorage = new Set();
-
-const dailyCounter = {
-  date: getCurrentDate(),
-  wins: 0,
-};
 
 router.post("/login", (req, res) => {
   try {
@@ -53,7 +49,7 @@ router.post("/logout", (req, res) => {
   }
 });
 
-router.post("/try_luck", (req, res) => {
+router.post("/try_luck", async (req, res) => {
   try {
     const token = getTokenFromReq(req);
     if (!tokenStorage.has(token)) {
@@ -61,17 +57,16 @@ router.post("/try_luck", (req, res) => {
     }
 
     const currentDate = getCurrentDate();
-    if (currentDate !== dailyCounter.date) {
-      dailyCounter.date = currentDate;
-      dailyCounter.wins = 0;
+    const todayScore = await client.get(currentDate);
+
+    const winRate = getWinRate(todayScore);
+    const isUserWin = simulateGamble(winRate);
+
+    if (isUserWin) {
+      await client.set(currentDate, todayScore ? +todayScore + 1 : 1);
+      console.log("todayScore", todayScore);
     }
 
-    const winRate = getWinRate(dailyCounter.wins);
-    const isUserWin = simulateGamble(winRate);
-    if (isUserWin) {
-      dailyCounter.wins++;
-    }
-    console.log("win rate is ", winRate);
     return res.status(200).json({ win: isUserWin });
   } catch (error) {
     console.error("An error occurred:", error);
