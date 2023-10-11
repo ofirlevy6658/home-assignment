@@ -10,3 +10,5 @@ export const simulateGamble = (winChance) => Math.random() < winChance;
 export const getCurrentDate = () => new Date().getDate().toString();
 
 export const SECRET = "r2isthebest";
+
+export const JWT_SECRET = "r2_top_secret";
